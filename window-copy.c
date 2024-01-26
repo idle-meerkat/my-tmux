@@ -2389,6 +2389,21 @@ window_copy_cmd_refresh_from_pane(struct window_copy_cmd_state *cs)
 	return (WINDOW_COPY_CMD_REDRAW);
 }
 
+static enum window_copy_cmd_action
+window_copy_cmd_toogle_selection_copy_cancel(struct window_copy_cmd_state *cs)
+{
+	struct window_mode_entry	*wme = cs->wme;
+	struct window_copy_mode_data	*data = wme->data;
+
+    if (data->cursordrag == CURSORDRAG_NONE) {
+      window_copy_cmd_begin_selection(cs);
+      return (WINDOW_COPY_CMD_REDRAW);
+    }
+
+    window_copy_cmd_copy_selection_and_cancel(cs);
+    return (WINDOW_COPY_CMD_CANCEL);
+}
+
 static const struct {
 	const char			 *command;
 	u_int				  minargs;
@@ -2875,7 +2890,13 @@ static const struct {
 	  .maxargs = 0,
 	  .clear = WINDOW_COPY_CMD_CLEAR_EMACS_ONLY,
 	  .f = window_copy_cmd_top_line
-	}
+	},
+	{ .command = "toogle-selection-copy-cancel",
+	  .minargs = 0,
+	  .maxargs = 0,
+	  .clear = WINDOW_COPY_CMD_CLEAR_ALWAYS,
+	  .f = window_copy_cmd_toogle_selection_copy_cancel,
+	},
 };
 
 static void
