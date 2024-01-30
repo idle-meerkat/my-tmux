@@ -1391,6 +1391,7 @@ process_key:
 		c->prompt_index = utf8_strlen(c->prompt_buffer);
 		goto changed;
 	case '\031': /* C-y */
+	case '\035': /* C-[ */
 		if (status_prompt_paste(c))
 			goto changed;
 		break;
