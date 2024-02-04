@@ -1230,23 +1230,29 @@ window_tree_key(struct window_mode_entry *wme, struct client *c,
     __unused struct session *s, __unused struct winlink *wl, key_code key,
     struct mouse_event *m)
 {
+    char buf1k[512];
 	struct window_pane		*wp = wme->wp;
 	struct window_tree_modedata	*data = wme->data;
-	struct window_tree_itemdata	*item, *new_item;
-	char				*name, *prompt = NULL;
+	struct window_tree_itemdata	*item, *new_item, *old_item;
+	char				*name = 0, *prompt = NULL;
 	struct cmd_find_state		 fs, *fsp = &data->fs;
 	int				 finished;
 	u_int				 tagged, x, y, idx;
-	struct session			*ns;
-	struct winlink			*nwl;
-	struct window_pane		*nwp;
+	struct session			*ns, *os;
+	struct winlink			*nwl, *owl;
+	struct window_pane		*nwp, *owp;
+    key_code                 tree_key = key;
 
-	item = mode_tree_get_current(data->data);
-	finished = mode_tree_key(data->data, c, &key, m, &x, &y);
+	old_item = item = mode_tree_get_current(data->data);
+	finished = mode_tree_key(data->data, c, &tree_key, m, &x, &y);
 	if (item != (new_item = mode_tree_get_current(data->data))) {
 		item = new_item;
 		data->offset = 0;
 	}
+    if (tree_key == KEYC_NONE) {
+        /* vb: overwrite only if NONE, ignore enter */
+        key = tree_key;
+    }
 	if (KEYC_IS_MOUSE(key) && m != NULL)
 		key = window_tree_mouse(data, key, x, item);
 	switch (key) {
@@ -1298,7 +1304,6 @@ window_tree_key(struct window_mode_entry *wme, struct client *c,
 		status_prompt_set(c, NULL, prompt, "",
 		    window_tree_kill_current_callback, window_tree_command_free,
 		    data, PROMPT_SINGLE|PROMPT_NOFORMAT, PROMPT_TYPE_COMMAND);
-		free(prompt);
 		break;
 	case 'X':
 		tagged = mode_tree_count_tagged(data->data);
@@ -1309,7 +1314,6 @@ window_tree_key(struct window_mode_entry *wme, struct client *c,
 		status_prompt_set(c, NULL, prompt, "",
 		    window_tree_kill_tagged_callback, window_tree_command_free,
 		    data, PROMPT_SINGLE|PROMPT_NOFORMAT, PROMPT_TYPE_COMMAND);
-		free(prompt);
 		break;
 	case ':':
 		tagged = mode_tree_count_tagged(data->data);
@@ -1321,14 +1325,37 @@ window_tree_key(struct window_mode_entry *wme, struct client *c,
 		status_prompt_set(c, NULL, prompt, "",
 		    window_tree_command_callback, window_tree_command_free,
 		    data, PROMPT_NOFORMAT, PROMPT_TYPE_COMMAND);
-		free(prompt);
 		break;
 	case '\r':
 		name = window_tree_get_target(item, &fs);
 		if (name != NULL)
 			mode_tree_run_command(c, NULL, data->command, name);
 		finished = 1;
-		free(name);
+		break;
+	case 'A':
+        name = window_tree_get_target(new_item, &fs);
+        window_tree_pull_item(new_item, &ns, &nwl, &nwp);
+        snprintf(buf1k, sizeof buf1k, "command-prompt \"rename-window -t %d -- '\\%%\\%%'\"", nwl->idx);
+        mode_tree_run_command(c, NULL, buf1k, name);
+        break;
+//	case 'c':
+//        window_tree_pull_item(new_item, &ns, &nwl, &nwp);
+//        snprintf(buf1k, sizeof buf1k, "new-window -N -d");
+//        mode_tree_run_command(c, NULL, buf1k, c->ttyname);
+//		mode_tree_build(data->data);
+//        break;
+	case ',':
+	case '.':
+        if (old_item != new_item && old_item->type == WINDOW_TREE_WINDOW &&
+            new_item->type == WINDOW_TREE_WINDOW)
+        {
+          name = window_tree_get_target(new_item, &fs);
+          window_tree_pull_item(new_item, &ns, &nwl, &nwp);
+          window_tree_pull_item(old_item, &os, &owl, &owp);
+          snprintf(buf1k, sizeof buf1k, "swap-window -d -s %d -t %d",
+                   owl->idx, nwl->idx);
+          mode_tree_run_command(c, NULL, buf1k, name);
+        }
 		break;
 	}
 	if (finished)
@@ -1337,4 +1364,6 @@ window_tree_key(struct window_mode_entry *wme, struct client *c,
 		mode_tree_draw(data->data);
 		wp->flags |= PANE_REDRAW;
 	}
+    free(prompt);
+    free(name);
 }

@@ -1252,6 +1252,8 @@ const struct options_table_entry options_table[] = {
 	OPTIONS_TABLE_HOOK("alert-activity", ""),
 	OPTIONS_TABLE_HOOK("alert-bell", ""),
 	OPTIONS_TABLE_HOOK("alert-silence", ""),
+	OPTIONS_TABLE_HOOK("before-select-window", ""),
+	OPTIONS_TABLE_HOOK("before-new-window", ""),
 	OPTIONS_TABLE_HOOK("client-active", ""),
 	OPTIONS_TABLE_HOOK("client-attached", ""),
 	OPTIONS_TABLE_HOOK("client-detached", ""),

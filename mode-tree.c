@@ -1049,6 +1049,12 @@ mode_tree_key(struct mode_tree_data *mtd, struct client *c, key_code *key,
 	case '\016': /* C-n */
 		mode_tree_down(mtd, 1);
 		break;
+	case '.':
+		mode_tree_up(mtd, 0);
+        break;
+	case ',':
+		mode_tree_down(mtd, 0);
+        break;
 	case KEYC_PPAGE:
 	case '\002': /* C-b */
 		for (i = 0; i < mtd->height; i++) {

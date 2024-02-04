@@ -58,6 +58,7 @@ extern const struct cmd_entry cmd_kill_session_entry;
 extern const struct cmd_entry cmd_kill_window_entry;
 extern const struct cmd_entry cmd_last_pane_entry;
 extern const struct cmd_entry cmd_last_window_entry;
+extern const struct cmd_entry cmd_reset_window_panes_mode;
 extern const struct cmd_entry cmd_link_window_entry;
 extern const struct cmd_entry cmd_list_buffers_entry;
 extern const struct cmd_entry cmd_list_clients_entry;
@@ -151,6 +152,7 @@ const struct cmd_entry *cmd_table[] = {
 	&cmd_kill_window_entry,
 	&cmd_last_pane_entry,
 	&cmd_last_window_entry,
+	&cmd_reset_window_panes_mode,
 	&cmd_link_window_entry,
 	&cmd_list_buffers_entry,
 	&cmd_list_clients_entry,

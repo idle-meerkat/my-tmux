@@ -28,6 +28,8 @@
 
 static enum cmd_retval	cmd_select_window_exec(struct cmd *,
 			    struct cmdq_item *);
+static enum cmd_retval
+cmd_reset_window_panes_mode_exec(struct cmd *self, struct cmdq_item *item);
 
 const struct cmd_entry cmd_select_window_entry = {
 	.name = "select-window",
@@ -81,6 +83,34 @@ const struct cmd_entry cmd_last_window_entry = {
 	.exec = cmd_select_window_exec
 };
 
+const struct cmd_entry cmd_reset_window_panes_mode = {
+	.name = "reset-window-panes-mode",
+	.alias = "reset-window-panes-mode",
+
+	.args = { "t:", 0, 0, NULL },
+	.usage = CMD_TARGET_SESSION_USAGE,
+
+	.target = { 't', CMD_FIND_SESSION, 0 },
+
+	.flags = 0,
+	.exec = cmd_reset_window_panes_mode_exec
+};
+
+static enum cmd_retval
+cmd_reset_window_panes_mode_exec(struct cmd *self, struct cmdq_item *item) {
+    int i;
+	struct client		*c = cmdq_get_client(item);
+	struct cmd_find_state	*current = cmdq_get_current(item);
+	struct cmd_find_state	*target = cmdq_get_target(item);
+	struct winlink		*wl = target ? target->wl : current->wl;
+	struct window_pane	*wp;
+
+	TAILQ_FOREACH(wp, &wl->window->panes, entry) {
+      window_pane_reset_mode_all(wp);
+    }
+	return (CMD_RETURN_NORMAL);
+}
+
 static enum cmd_retval
 cmd_select_window_exec(struct cmd *self, struct cmdq_item *item)
 {
@@ -104,6 +134,7 @@ cmd_select_window_exec(struct cmd *self, struct cmdq_item *item)
 
 	if (next || previous || last) {
 		activity = args_has(args, 'a');
+		cmdq_insert_hook(s, item, current, "before-select-window");
 		if (next) {
 			if (session_next(s, activity) != 0) {
 				cmdq_error(item, "no next window");
@@ -128,6 +159,7 @@ cmd_select_window_exec(struct cmd *self, struct cmdq_item *item)
 		 * If -T and select-window is invoked on same window as
 		 * current, switch to previous window.
 		 */
+        cmdq_insert_hook(s, item, current, "before-select-window");
 		if (args_has(args, 'T') && wl == s->curw) {
 			if (session_last(s) != 0) {
 				cmdq_error(item, "no last window");

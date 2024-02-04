@@ -38,7 +38,7 @@ const struct cmd_entry cmd_new_window_entry = {
 	.name = "new-window",
 	.alias = "neww",
 
-	.args = { "abc:de:F:kn:PSt:", 0, -1, NULL },
+	.args = { "abc:de:F:kn:PSt:N:", 0, -1, NULL },
 	.usage = "[-abdkPS] [-c start-directory] [-e environment] [-F format] "
 		 "[-n window-name] " CMD_TARGET_WINDOW_USAGE " [shell-command]",
 
@@ -65,6 +65,12 @@ cmd_new_window_exec(struct cmd *self, struct cmdq_item *item)
 	struct cmd_find_state	 fs;
 	struct args_value	*av;
 
+    if (current && current->wl) {
+      cmd_find_from_winlink(&fs, current->wl, 0);
+      if (args_has(args, 'N')) {
+        cmdq_insert_hook(s, item, &fs, "before-new-window");
+      }
+    }
 	/*
 	 * If -S and -n are given and -t is not and a single window with this
 	 * name already exists, select it.
