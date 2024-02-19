@@ -79,7 +79,7 @@ static void	tty_check_overlay_range(struct tty *, u_int, u_int, u_int,
 #define tty_full_width(tty, ctx) \
 	((ctx)->xoff == 0 && (ctx)->sx >= (tty)->sx)
 
-#define TTY_BLOCK_INTERVAL (100000 /* 100 milliseconds */)
+#define TTY_BLOCK_INTERVAL (16666 /* 16 milliseconds */)
 #define TTY_BLOCK_START(tty) (1 + ((tty)->sx * (tty)->sy) * 8)
 #define TTY_BLOCK_STOP(tty) (1 + ((tty)->sx * (tty)->sy) / 8)
 
