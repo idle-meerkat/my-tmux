@@ -4839,8 +4839,12 @@ window_copy_cursor_end_of_line(struct window_mode_entry *wme)
     /* NOTE(vb) honor the rectangle */
 	if (data->screen.sel != NULL && data->rectflag)
 		grid_reader_cursor_end_of_line(&gr, 1, 1);
-	else
+	else {
 		grid_reader_cursor_end_of_line(&gr, 1, 0);
+        if (gr.cx) {
+          grid_reader_cursor_left(&gr, 1);
+        }
+    }
 	grid_reader_get_cursor(&gr, &px, &py);
 	window_copy_acquire_cursor_down(wme, hsize, screen_size_y(back_s),
 	    data->oy, oldy, px, py, 0);
