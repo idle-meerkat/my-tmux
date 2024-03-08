@@ -629,13 +629,15 @@ window_copy_pageup1(struct window_mode_entry *wme, int half_page)
 	} else
 		data->oy += n;
 
+#if 0
 	if (data->screen.sel == NULL || !data->rectflag) {
 		py = screen_hsize(data->backing) + data->cy - data->oy;
 		px = window_copy_find_length(wme, py);
 		if ((data->cx >= data->lastsx && data->cx != px) ||
 		    data->cx > px)
 			window_copy_cursor_end_of_line(wme);
-	}
+  }
+#endif
 
 	if (data->searchmark != NULL && !data->timeout)
 		window_copy_search_marks(wme, NULL, data->searchregex, 1);
@@ -677,13 +679,15 @@ window_copy_pagedown(struct window_mode_entry *wme, int half_page,
 	} else
 		data->oy -= n;
 
+#if 0
 	if (data->screen.sel == NULL || !data->rectflag) {
 		py = screen_hsize(data->backing) + data->cy - data->oy;
 		px = window_copy_find_length(wme, py);
 		if ((data->cx >= data->lastsx && data->cx != px) ||
 		    data->cx > px)
 			window_copy_cursor_end_of_line(wme);
-	}
+  }
+#endif
 
 	if (scroll_exit && data->oy == 0)
 		return (1);
@@ -1244,8 +1248,7 @@ window_copy_cmd_cursor_right(struct window_copy_cmd_state *cs)
 	u_int				 np = wme->prefix;
 
 	for (; np != 0; np--) {
-		window_copy_cursor_right(wme, data->screen.sel != NULL &&
-		    data->rectflag);
+		window_copy_cursor_right(wme, 1);
 	}
 	return (WINDOW_COPY_CMD_NOTHING);
 }
@@ -4833,6 +4836,7 @@ window_copy_cursor_end_of_line(struct window_mode_entry *wme)
 	oldy = data->cy;
 
 	grid_reader_start(&gr, back_s->grid, px, py);
+    /* NOTE(vb) honor the rectangle */
 	if (data->screen.sel != NULL && data->rectflag)
 		grid_reader_cursor_end_of_line(&gr, 1, 1);
 	else
@@ -4941,6 +4945,7 @@ window_copy_cursor_up(struct window_mode_entry *wme, int scroll_only)
 	int				 norectsel;
 
 	norectsel = data->screen.sel == NULL || !data->rectflag;
+	norectsel = 0;
 	oy = screen_hsize(data->backing) + data->cy - data->oy;
 	ox = window_copy_find_length(wme, oy);
 	if (norectsel && data->cx != ox) {
@@ -4990,7 +4995,7 @@ window_copy_cursor_up(struct window_mode_entry *wme, int scroll_only)
 	if (data->lineflag == LINE_SEL_LEFT_RIGHT)
 	{
 		py = screen_hsize(data->backing) + data->cy - data->oy;
-		if (data->rectflag)
+		if (1 || data->rectflag)
 			px = screen_size_x(data->backing);
 		else
 			px = window_copy_find_length(wme, py);
@@ -5015,6 +5020,7 @@ window_copy_cursor_down(struct window_mode_entry *wme, int scroll_only)
 	int				 norectsel;
 
 	norectsel = data->screen.sel == NULL || !data->rectflag;
+	norectsel = 0;
 	oy = screen_hsize(data->backing) + data->cy - data->oy;
 	ox = window_copy_find_length(wme, oy);
 	if (norectsel && data->cx != ox) {
@@ -5056,7 +5062,7 @@ window_copy_cursor_down(struct window_mode_entry *wme, int scroll_only)
 	if (data->lineflag == LINE_SEL_LEFT_RIGHT)
 	{
 		py = screen_hsize(data->backing) + data->cy - data->oy;
-		if (data->rectflag)
+		if (1 || data->rectflag)
 			px = screen_size_x(data->backing);
 		else
 			px = window_copy_find_length(wme, py);
