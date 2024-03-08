@@ -19,6 +19,7 @@
 #include <sys/types.h>
 
 #include <stdlib.h>
+#include <string.h>
 
 #include "tmux.h"
 
@@ -99,14 +100,21 @@ const struct cmd_entry cmd_reset_window_panes_mode = {
 static enum cmd_retval
 cmd_reset_window_panes_mode_exec(struct cmd *self, struct cmdq_item *item) {
     int i;
+	struct args		*args = cmd_get_args(self);
 	struct client		*c = cmdq_get_client(item);
 	struct cmd_find_state	*current = cmdq_get_current(item);
 	struct cmd_find_state	*target = cmdq_get_target(item);
 	struct winlink		*wl = target ? target->wl : current->wl;
 	struct window_pane	*wp;
+	struct window_mode_entry *mode;
 
 	TAILQ_FOREACH(wp, &wl->window->panes, entry) {
-      window_pane_reset_mode_all(wp);
+      if (TAILQ_EMPTY(&wp->modes))
+        continue;
+      mode = TAILQ_FIRST(&wp->modes);
+      if (mode && mode->mode && !strcmp(mode->mode->name, "copy-mode"))
+        continue;
+      window_pane_reset_mode(wp);
     }
 	return (CMD_RETURN_NORMAL);
 }
