@@ -974,7 +974,7 @@ window_copy_cmd_bottom_line(struct window_copy_cmd_state *cs)
 	struct window_mode_entry	*wme = cs->wme;
 	struct window_copy_mode_data	*data = wme->data;
 
-	data->cx = 0;
+	/* data->cx = 0; */
 	data->cy = screen_size_y(&data->screen) - 1;
 
 	window_copy_update_selection(wme, 1, 0);
@@ -1427,7 +1427,7 @@ window_copy_cmd_middle_line(struct window_copy_cmd_state *cs)
 	struct window_mode_entry	*wme = cs->wme;
 	struct window_copy_mode_data	*data = wme->data;
 
-	data->cx = 0;
+	/* data->cx = 0; */
 	data->cy = (screen_size_y(&data->screen) - 1) / 2;
 
 	window_copy_update_selection(wme, 1, 0);
@@ -2003,7 +2003,7 @@ window_copy_cmd_top_line(struct window_copy_cmd_state *cs)
 	struct window_mode_entry	*wme = cs->wme;
 	struct window_copy_mode_data	*data = wme->data;
 
-	data->cx = 0;
+	/* data->cx = 0; */
 	data->cy = 0;
 
 	window_copy_update_selection(wme, 1, 0);
